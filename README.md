@@ -1,5 +1,7 @@
 # NK-Rest
 
+[![Build Status](https://circleci.com/gh/:owner/:repo.svg?style=shield&circle-token=:circle-token)]
+
 NK Rest is a rest api endpoint in Haskell with Postgres database.
 
 ## Prerequisite
