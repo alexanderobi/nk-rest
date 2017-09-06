@@ -1,6 +1,6 @@
 # NK-Rest
 
-[![CircleCI](https://circleci.com/gh/alexanderobi/nk-rest.svg?style=svg)](https://circleci.com/gh/alexanderobi/nk-rest)
+[![CircleCI](https://circleci.com/gh/alexanderobi/nk-rest.svg?style=svg)](https://circleci.com/gh/alexanderobi/nk-rest) [![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen.svg?style=flat-square)](CONTRIBUTING.md#pull-requests)
 
 NK Rest is a rest api endpoint in Haskell with Postgres database.
 
