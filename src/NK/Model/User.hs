@@ -3,6 +3,7 @@
 module NK.Model.User (
     getUserById
   , getUsers
+  , createUser
   , User
 ) where
 
@@ -14,18 +15,18 @@ import Data.Aeson
 import NK.Util.JsonUtil
 
 data User = User {
-    id         :: String
+    id         :: Maybe String
   , name       :: String
   , slug       :: String
   , email      :: String
   , phone      :: String
   , image_url  :: String
   , language   :: String
-  , last_login :: String
+  , last_login :: Maybe String
   , location   :: String
-  , created_at :: String
-  , updated_at :: String
-  , published  :: Bool
+  , created_at :: Maybe String
+  , updated_at :: Maybe String
+  , published  :: Maybe Bool
 } deriving (Generic, Show)
 
 instance ToJSON User where
@@ -46,3 +47,12 @@ getUserById i c = do
   execute select [toSql i]
   result <- fetchRowMap select
   toJsonUtil' result
+
+getValues :: User -> [SqlValue]
+getValues u = [toSql $ name u, toSql $ slug u, toSql $ email u, toSql $ phone u, toSql $ image_url u, toSql $ language u, toSql $ location u]
+
+createUser :: User -> Connection -> IO Integer
+createUser u c = do
+  insert <- prepare c "insert into users (name, slug, email, phone, image_url, language, location) values (?,?,?,?,?,?,?)"
+  putStr . show $ u
+  execute insert $ getValues u

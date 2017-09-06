@@ -3,10 +3,11 @@
 module NK.Controllers.User (
     getUsersRoute
   , getUserByIdRoute
+  , postUserRoute
 ) where
 
-import Web.Scotty (json, param, get, liftAndCatchIO, ActionM, ScottyM)
-import NK.Model.User (getUserById, getUsers, User)
+import Web.Scotty (json, param, get, jsonData, liftAndCatchIO, post, ActionM, ScottyM)
+import NK.Model.User (getUserById, getUsers, createUser, User)
 import NK.DBConnection (getConnection)
 
 getUserByIdAction :: ActionM ()
@@ -20,8 +21,18 @@ getUsersAction = do
   result <- liftAndCatchIO (getUsers =<< getConnection)
   json result
 
+postUserAction :: ActionM ()
+postUserAction = do
+  user <- jsonData
+  result <- liftAndCatchIO (createUser user =<< getConnection)
+  liftAndCatchIO $ putStr . show $ user
+  if result > 0 then json True else json False
+
 getUserByIdRoute :: ScottyM ()
 getUserByIdRoute = get "/users/:id" getUserByIdAction
 
 getUsersRoute :: ScottyM ()
 getUsersRoute = get "/users" getUsersAction
+
+postUserRoute :: ScottyM ()
+postUserRoute = post "/users" postUserAction

@@ -5,10 +5,11 @@ module Rest (
 import Data.Monoid
 import Web.Scotty (scotty, json, param, get, middleware)
 import Network.Wai.Middleware.RequestLogger (logStdoutDev)
-import NK.Controllers.User (getUserByIdRoute, getUsersRoute)
+import NK.Controllers.User (getUserByIdRoute, getUsersRoute, postUserRoute)
 
 scottyMain :: IO ()
 scottyMain = scotty 3333 $ do
   middleware logStdoutDev
   getUserByIdRoute
   getUsersRoute
+  postUserRoute
