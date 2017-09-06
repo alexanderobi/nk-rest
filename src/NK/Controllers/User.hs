@@ -25,7 +25,6 @@ postUserAction :: ActionM ()
 postUserAction = do
   user <- jsonData
   result <- liftAndCatchIO (createUser user =<< getConnection)
-  liftAndCatchIO $ putStr . show $ user
   if result > 0 then json True else json False
 
 getUserByIdRoute :: ScottyM ()
