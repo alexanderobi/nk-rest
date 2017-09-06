@@ -1,6 +1,7 @@
 module Main where
 
 import Lib
+import Rest
 
 main :: IO ()
-main = someFunc
+main = scottyMain

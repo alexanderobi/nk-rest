@@ -1,8 +1,9 @@
 {-# LANGUAGE DeriveGeneric #-}
 
-module NK.Model.Users (
-    getAllUsers
+module NK.Model.User (
+    getUserById
   , getUsers
+  , User
 ) where
 
 import Control.Exception
@@ -12,7 +13,7 @@ import GHC.Generics
 import Data.Aeson
 import NK.Util.JsonUtil
 
-data Users = Users {
+data User = User {
     id         :: String
   , name       :: String
   , slug       :: String
@@ -27,28 +28,20 @@ data Users = Users {
   , published  :: Bool
 } deriving (Generic, Show)
 
-instance ToJSON Users where
+instance ToJSON User where
   toEncoding = genericToEncoding defaultOptions
 
-instance FromJSON Users where
+instance FromJSON User where
 
-getAllUsers :: Connection -> IO ()
-getAllUsers c = do
-  select <- prepare c "select * from users limit 10"
-  execute select []
-  result <- fetchAllRows select
-  putStr . show $ result
-
-
-getUsers :: Connection -> IO [Users]
+getUsers :: Connection -> IO [User]
 getUsers c = do
   select <- prepare c "select * from users limit 10"
   execute select []
   result <- fetchAllRowsMap' select
   toJsonUtil result
 
-getUserById :: Connection -> String -> IO Users
-getUserById c i = do
+getUserById :: String -> Connection -> IO User
+getUserById i c = do
   select <- prepare c "select * from users where id = ?"
   execute select [toSql i]
   result <- fetchRowMap select

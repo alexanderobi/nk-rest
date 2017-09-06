@@ -1,4 +1,6 @@
-module NK.Db where
+module NK.DBConnection (
+  getConnection
+) where
 
 import Database.HDBC
 import Database.HDBC.PostgreSQL
@@ -6,22 +8,20 @@ import System.Environment
 import Data.Maybe
 import Data.Monoid
 
-type ConnectionString = String
-
 host :: IO String
-host = lookupEnv "nk_host" >>= \h -> fmap ("host=" <> ) fromMaybe h "localhost"
+host =  ("host="<>) <$> fromMaybe "localhost" <$> lookupEnv "nk_host"
 
 user :: IO String
-user = lookupEnv "nk_user" >>= \u -> fmap ("user=" <> ) fromMaybe u "nkrest"
+user = (" user="<>) <$> fromMaybe "nkrest" <$> lookupEnv "nk_user"
 
 password :: IO String
-password = lookupEnv "nk_password" >>= \p -> fmap ("password=" <> ) fromMaybe p "password"
+password = (" password="<>) <$> fromMaybe "password" <$> lookupEnv "nk_password"
 
 dbname:: IO String
-dbname = lookupEnv "nk_dbname" >>= \p -> fmap ("dbname=" <> ) fromMaybe p "nkrest"
+dbname =  (" dbname=" <> ) <$> fromMaybe "nkrest" <$> lookupEnv "nk_dbname"
 
 buildConnectString :: IO String
-buildConnectString = fmap (foldl \a b -> a <> b) sequenceA [host, user, password, dbname]
+buildConnectString = fmap concat (sequenceA [host, user, password, dbname])
 
 getConnection :: IO Connection
 getConnection = buildConnectString >>= \s -> connectPostgreSQL s
