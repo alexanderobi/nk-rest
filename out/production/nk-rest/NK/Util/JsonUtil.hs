@@ -1,16 +1,17 @@
-{-# LANGUAGE OverloadedStrings, MultiParamTypeClasses #-}
+{-# LANGUAGE MultiParamTypeClasses #-}
+{-# LANGUAGE OverloadedStrings     #-}
 
 module NK.Util.JsonUtil (
     toJsonUtil
   , toJsonUtil'
 ) where
 
-import Data.Aeson
-import Data.Convertible
-import Database.HDBC
-import qualified Data.Text as T
+import           Data.Aeson
+import           Data.Convertible
+import qualified Data.Map.Lazy      as Map
+import qualified Data.Text          as T
 import qualified Data.Text.Encoding as T
-import qualified Data.Map.Lazy as Map
+import           Database.HDBC
 
 nothingError :: IOError
 nothingError = userError "Id NotFound"

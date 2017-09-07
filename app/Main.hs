@@ -1,7 +1,6 @@
 module Main where
 
-import Lib
-import Rest
+import           Rest
 
 main :: IO ()
 main = scottyMain

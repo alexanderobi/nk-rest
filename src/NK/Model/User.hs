@@ -7,23 +7,22 @@ module NK.Model.User (
   , User
 ) where
 
-import Control.Exception
-import Database.HDBC
-import Database.HDBC.PostgreSQL
-import GHC.Generics
-import Data.Aeson
-import NK.Util.JsonUtil
+import           Data.Aeson
+import           Database.HDBC
+import           Database.HDBC.PostgreSQL
+import           GHC.Generics
+import           NK.Util.JsonUtil
 
 data User = User {
     id         :: Maybe String
   , name       :: String
-  , slug       :: String
+  , slug       :: Maybe String
   , email      :: String
-  , phone      :: String
-  , image_url  :: String
-  , language   :: String
+  , phone      :: Maybe String
+  , image_url  :: Maybe String
+  , language   :: Maybe String
   , last_login :: Maybe String
-  , location   :: String
+  , location   :: Maybe String
   , created_at :: Maybe String
   , updated_at :: Maybe String
   , published  :: Maybe Bool
@@ -37,14 +36,14 @@ instance FromJSON User where
 getUsers :: Connection -> IO [User]
 getUsers c = do
   select <- prepare c "select * from users limit 10"
-  execute select []
+  _ <- execute select []
   result <- fetchAllRowsMap' select
   toJsonUtil result
 
 getUserById :: String -> Connection -> IO User
 getUserById i c = do
   select <- prepare c "select * from users where id = ?"
-  execute select [toSql i]
+  _ <- execute select [toSql i]
   result <- fetchRowMap select
   toJsonUtil' result
 
@@ -54,5 +53,4 @@ getValues u = [toSql $ name u, toSql $ slug u, toSql $ email u, toSql $ phone u,
 createUser :: User -> Connection -> IO Integer
 createUser u c = do
   insert <- prepare c "insert into users (name, slug, email, phone, image_url, language, location) values (?,?,?,?,?,?,?)"
-  putStr . show $ u
   execute insert $ getValues u
