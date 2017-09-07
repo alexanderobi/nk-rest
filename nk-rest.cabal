@@ -15,8 +15,7 @@ cabal-version:       >=1.10
 
 library
   hs-source-dirs:      src
-  exposed-modules:     Lib
-                     , Rest
+  exposed-modules:     Rest
                      , NK.DBConnection
                      , NK.Model.User
                      , NK.Controllers.User
