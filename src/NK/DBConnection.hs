@@ -2,6 +2,7 @@ module NK.DBConnection (
   getConnection
 ) where
 
+import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Reader
 import           Data.Monoid
 import           Database.HDBC.PostgreSQL
@@ -28,8 +29,10 @@ buildConnectString = do
   dbname <- getDBEnv " dbname=" "nk_dbname" "nkrest"
   return (host <> user <> pass <> dbname)
 
-connection' :: ReaderT String IO Connection
-connection' = ReaderT connectPostgreSQL
+withConnection :: ReaderT String IO Connection
+withConnection = do
+  s <- ask
+  liftIO $ connectPostgreSQL s
 
 getConnection :: IO Connection
-getConnection = buildConnectString >>= runReaderT connection'
+getConnection = buildConnectString >>= runReaderT withConnection
