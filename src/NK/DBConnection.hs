@@ -8,7 +8,9 @@ import           Database.HDBC.PostgreSQL
 import           System.Environment
 
 type EnvValue = String
+
 type EnvKey = String
+
 type DefaultValue = String
 
 getDBEnv :: EnvKey -> EnvValue -> DefaultValue -> IO String
