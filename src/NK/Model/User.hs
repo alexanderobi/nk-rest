@@ -36,7 +36,9 @@ instance ToJSON User where
 instance FromJSON User where
 
 prepare' :: String -> ReaderT Connection IO Statement
-prepare' s =  ReaderT $ flip prepare s
+prepare' s =  do
+  c <- ask
+  liftIO $ prepare c s
 
 getUsers :: ReaderT Connection IO [User]
 getUsers = do
@@ -54,12 +56,13 @@ getUserById i = do
   result <- liftIO $ fetchRowMap select
   liftIO $ toJsonUtil' result
 
-getUserByEmail :: String -> Connection -> IO User
-getUserByEmail i c = do
-  select <- runReaderT (prepare' "select * from users where email = ?") c
-  _ <- execute select [toSql i]
-  result <- fetchRowMap select
-  toJsonUtil' result
+getUserByEmail :: String -> ReaderT Connection IO User
+getUserByEmail i = do
+  c <- ask
+  select <- liftIO $ runReaderT (prepare' "select * from users where email = ?") c
+  _ <- liftIO $ execute select [toSql i]
+  result <- liftIO $ fetchRowMap select
+  liftIO $ toJsonUtil' result
 
 getValues :: User -> [SqlValue]
 getValues u = [toSql $ name u, toSql $ slug u, toSql $ email u, toSql $ phone u, toSql $ image_url u, toSql $ language u, toSql $ location u]
@@ -69,4 +72,4 @@ createUser u = do
   c <- ask
   insert <- liftIO $ prepare c "insert into users (name, slug, email, phone, image_url, language, location) values (?,?,?,?,?,?,?)"
   _ <- liftIO $ execute insert $ getValues u
-  liftIO $ getUserByEmail (email u) c
+  liftIO $ runReaderT (getUserByEmail (email u)) c
