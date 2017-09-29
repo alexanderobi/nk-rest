@@ -7,9 +7,11 @@ module NK.Model.User (
   , User
 ) where
 
+import           Control.Monad.IO.Class
+import           Control.Monad.Trans.Reader
 import           Data.Aeson
 import           Database.HDBC
-import           Database.HDBC.PostgreSQL
+import           Database.HDBC.PostgreSQL   (Connection)
 import           GHC.Generics
 import           NK.Util.JsonUtil
 
@@ -24,7 +26,7 @@ data User = User {
   , last_login :: Maybe String
   , location   :: Maybe String
   , created_at :: Maybe String
-  , updated_at :: Maybe String
+  , updated_at :: String
   , published  :: Maybe Bool
 } deriving (Generic, Show)
 
@@ -33,16 +35,28 @@ instance ToJSON User where
 
 instance FromJSON User where
 
-getUsers :: Connection -> IO [User]
-getUsers c = do
-  select <- prepare c "select * from users limit 10"
-  _ <- execute select []
-  result <- fetchAllRowsMap' select
-  toJsonUtil result
+prepare' :: String -> ReaderT Connection IO Statement
+prepare' s =  ReaderT $ flip prepare s
 
-getUserById :: String -> Connection -> IO User
-getUserById i c = do
-  select <- prepare c "select * from users where id = ?"
+getUsers :: ReaderT Connection IO [User]
+getUsers = do
+  c <- ask
+  select <- liftIO $ prepare c "select * from users limit 10"
+  _ <- liftIO $ execute select []
+  result <- liftIO $ fetchAllRowsMap' select
+  liftIO $ toJsonUtil result
+
+getUserById :: String -> ReaderT Connection IO User
+getUserById i = do
+  c <- ask
+  select <- liftIO $ prepare c "select * from users where id = ?"
+  _ <- liftIO $ execute select [toSql i]
+  result <- liftIO $ fetchRowMap select
+  liftIO $ toJsonUtil' result
+
+getUserByEmail :: String -> Connection -> IO User
+getUserByEmail i c = do
+  select <- runReaderT (prepare' "select * from users where email = ?") c
   _ <- execute select [toSql i]
   result <- fetchRowMap select
   toJsonUtil' result
@@ -50,7 +64,9 @@ getUserById i c = do
 getValues :: User -> [SqlValue]
 getValues u = [toSql $ name u, toSql $ slug u, toSql $ email u, toSql $ phone u, toSql $ image_url u, toSql $ language u, toSql $ location u]
 
-createUser :: User -> Connection -> IO Integer
-createUser u c = do
-  insert <- prepare c "insert into users (name, slug, email, phone, image_url, language, location) values (?,?,?,?,?,?,?)"
-  execute insert $ getValues u
+createUser :: User -> ReaderT Connection IO User
+createUser u = do
+  c <- ask
+  insert <- liftIO $ prepare c "insert into users (name, slug, email, phone, image_url, language, location) values (?,?,?,?,?,?,?)"
+  _ <- liftIO $ execute insert $ getValues u
+  liftIO $ getUserByEmail (email u) c
