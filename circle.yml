@@ -14,8 +14,6 @@ dependencies:
     - stack setup --no-terminal
     - stack build --no-system-ghc --only-configure --no-terminal
   post:
-    - docker info
-    - docker build --rm=false -t alexebube/nk-rest-api:$CIRCLE_SHA1 .
     - stack image container
 
 compile:
