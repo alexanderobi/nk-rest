@@ -1,33 +1,24 @@
 machine:
-  services:
-    - docker
-
-dependencies:
-  cache_directories:
-    - "~/.stack"
   pre:
-    - wget https://github.com/commercialhaskell/stack/releases/download/v1.2.0/stack-1.2.0-linux-x86_64.tar.gz -O /tmp/stack.tar.gz
-    - mkdir /tmp/stack/
-    - tar -xvzf /tmp/stack.tar.gz -C /tmp/stack/
-    - sudo mv /tmp/stack/stack-1.2.0-linux-x86_64/stack /usr/bin/stack
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.6 20
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.6 20
+    - sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-4.9 10
+    - sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-4.9 10
+  ghc:
+      version: 7.10.1
+dependencies:
+  pre:
+    - wget -q -O- https://s3.amazonaws.com/download.fpcomplete.com/ubuntu/fpco.key | sudo apt-key add -
+    - echo 'deb http://download.fpcomplete.com/ubuntu/precise stable main'|sudo tee /etc/apt/sources.list.d/fpco.list
+    - sudo apt-get update && sudo apt-get -y install stack
   override:
-    - stack setup --no-terminal
-    - stack build --no-system-ghc --only-configure --no-terminal
-  post:
-    - docker info
-    - docker build --rm=false -t alexebube/nk-rest-api:$CIRCLE_SHA1 .
-
-compile:
-  override:
-    - stack build --no-terminal
+    - stack --version
+    - stack --install-ghc --no-terminal build --only-snapshot -j 1
+  cache_directories:
+    - ~/.stack
 
 test:
+  pre:
+    - stack build
   override:
-    - stack test --no-terminal
-
-deployment:
-  prod:
-    branch: master
-    commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push alexebube/nk-rest-api:$CIRCLE_SHA1
+    - stack test
