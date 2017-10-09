@@ -10,6 +10,8 @@ dependencies:
     - mkdir /tmp/stack/
     - tar -xvzf /tmp/stack.tar.gz -C /tmp/stack/
     - sudo mv /tmp/stack/stack-1.2.0-linux-x86_64/stack /usr/bin/stack
+    - docker info
+    - docker build --rm=false -t alexebube/nk-rest-api:$CIRCLE_SHA1 .
   override:
     - stack setup --no-terminal
     - stack build --no-system-ghc --only-configure --no-terminal
