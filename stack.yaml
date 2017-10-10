@@ -79,7 +79,7 @@ image:
 
       # You can optionally name the image. Stack will use the project
       # directory name if you leave out this option.
-      name: "alexebube/nk-rest-api$CIRCLE_SHA1"
+      name: "alexebube/nk-rest-api"
 
       # Optionally specify a list of executables. Stack will create
       # a tagged image for each in the list. these images will have
