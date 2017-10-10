@@ -1,13 +1,13 @@
-FROM haskell:8
+FROM fpco/stack-build
 
 WORKDIR /opt/server
 
-COPY ./nk-rest.cabal /opt/server/nk-rest.cabal
+COPY . /opt/server
+
+RUN stack setup --no-terminal
 
 RUN stack install --only-dependencies
 
-COPY . /opt/server
+RUN stack build
 
-RUN stack install
-
-CMD ["stack build", "--exec", "nk-rest-exe"]
+ENTRYPOINT ["stack", "exec", "nk-rest-exe"]

@@ -14,7 +14,7 @@ dependencies:
     - stack setup --no-terminal
     - stack build --no-system-ghc --only-configure --no-terminal
   post:
-    - stack image container
+    - docker build . -t 'alexebube/nk-rest-api:latest'
 
 compile:
   override:
