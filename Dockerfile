@@ -1,12 +1,16 @@
-FROM fpco/stack-build
+FROM haskell:8.0.2
 
 WORKDIR /opt/server
 
 COPY . /opt/server
 
-RUN stack setup --no-terminal
+RUN apt-get update && \
+    apt-get install wget ca-certificates -y && \
+    wget --quiet -O - https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - && \
+    apt-get update && \
+    apt-get install libpq-dev -y
 
-RUN stack install --only-dependencies
+RUN stack install --system-ghc --only-configure --no-terminal
 
 RUN stack build
 
