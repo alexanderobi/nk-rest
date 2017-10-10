@@ -6,6 +6,10 @@ dependencies:
   override:
     - docker build --rm=false -t alexebube/nk-rest-api:latest .
 
+test:
+  override:
+    - echo "OK"
+
 deployment:
   prod:
     branch: master
