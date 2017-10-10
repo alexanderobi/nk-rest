@@ -14,4 +14,6 @@ RUN stack install --system-ghc --only-configure --no-terminal
 
 RUN stack build
 
+EXPOSE 3333
+
 ENTRYPOINT ["stack", "exec", "nk-rest-exe"]
