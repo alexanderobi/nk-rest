@@ -21,3 +21,5 @@ tags
 /.dir-locals.el
 /.git/
 .vscode
+gcloudUtil
+password.txt
