@@ -1,0 +1,49 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: nk-rest-service
+  labels:
+    app: nk-rest
+spec:
+  ports:
+  - name: http
+    protocol: TCP
+    port: 80
+    targetPort: 3333
+  selector:
+    app: nk-rest
+    tier: backend
+  type: LoadBalancer
+---
+apiVersion: apps/v1beta1
+kind: Deployment
+metadata:
+  name: nk-rest
+  labels:
+    app: nk-rest
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nk-rest
+        tier: backend
+    spec:
+      containers:
+      - name: nk-rest
+        image: alexebube/nk-rest-api:latest
+        env:
+        - name: nk_host
+          value: nk-rest-postgres
+        - name: nk_user
+          value: nkrest
+        - name: nk_password
+          valueFrom:
+            secretKeyRef:
+              name: nk-db-pass
+              key: password.txt
+        - name: nk_dbname
+          value: nkrest
+        ports:
+        - containerPort: 3333
+          name: nk-rest
