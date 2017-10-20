@@ -48,26 +48,26 @@ getUsers = do
   result <- liftIO $ fetchAllRowsMap' select
   liftIO $ toJsonUtil result
 
-getUserById :: String -> ReaderT Connection IO User
+getUserById :: String -> ReaderT Connection IO (Maybe User)
 getUserById i = do
   c <- ask
   select <- liftIO $ prepare c "select * from users where id = ?"
   _ <- liftIO $ execute select [toSql i]
   result <- liftIO $ fetchRowMap select
-  liftIO $ toJsonUtil' result
+  return (toJsonUtil' result)
 
-getUserByEmail :: String -> ReaderT Connection IO User
+getUserByEmail :: String -> ReaderT Connection IO (Maybe User)
 getUserByEmail i = do
   c <- ask
   select <- liftIO $ runReaderT (prepare' "select * from users where email = ?") c
   _ <- liftIO $ execute select [toSql i]
   result <- liftIO $ fetchRowMap select
-  liftIO $ toJsonUtil' result
+  return (toJsonUtil' result)
 
 getValues :: User -> [SqlValue]
 getValues u = [toSql $ name u, toSql $ slug u, toSql $ email u, toSql $ phone u, toSql $ image_url u, toSql $ language u, toSql $ location u]
 
-createUser :: User -> ReaderT Connection IO User
+createUser :: User -> ReaderT Connection IO (Maybe User)
 createUser u = do
   c <- ask
   insert <- liftIO $ prepare c "insert into users (name, slug, email, phone, image_url, language, location) values (?,?,?,?,?,?,?)"
