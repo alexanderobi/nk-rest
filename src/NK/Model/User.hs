@@ -45,7 +45,7 @@ getUsers = do
   c <- ask
   select <- liftIO $ prepare c "select * from users limit 10"
   _ <- liftIO $ execute select []
-  result <- liftIO $ fetchAllRowsMap' select
+  result <- liftIO $ handleSqlError $ fetchAllRowsMap' select
   liftIO $ toJsonUtil result
 
 getUserById :: String -> ReaderT Connection IO (Maybe User)
@@ -53,7 +53,7 @@ getUserById i = do
   c <- ask
   select <- liftIO $ prepare c "select * from users where id = ?"
   _ <- liftIO $ execute select [toSql i]
-  result <- liftIO $ fetchRowMap select
+  result <- liftIO $ handleSqlError $ fetchRowMap select
   return (toJsonUtil' result)
 
 getUserByEmail :: String -> ReaderT Connection IO (Maybe User)
@@ -61,7 +61,7 @@ getUserByEmail i = do
   c <- ask
   select <- liftIO $ runReaderT (prepare' "select * from users where email = ?") c
   _ <- liftIO $ execute select [toSql i]
-  result <- liftIO $ fetchRowMap select
+  result <- liftIO $ handleSqlError $ fetchRowMap select
   return (toJsonUtil' result)
 
 getValues :: User -> [SqlValue]

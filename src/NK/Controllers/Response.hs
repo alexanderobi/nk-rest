@@ -5,12 +5,13 @@ module NK.Controllers.Response (
     , handleEx
 ) where
 
-
+import           Control.Monad.IO.Class
 import           Data.String                (fromString)
 import           Web.Scotty.Trans           (ActionT, ScottyError, stringError, showError, status, html, json)
 import           Network.HTTP.Types
 import           Data.Aeson                 (ToJSON, FromJSON, toEncoding, genericToEncoding, defaultOptions)
 import           GHC.Generics
+import           System.Log.Logger
 
 data Except = Forbidden | NotFound Int | StringEx String deriving (Show, Eq)
 
@@ -54,7 +55,7 @@ pageNotFound = ErrorResponse {
     , errors = Nothing
 }
 
-handleEx :: Monad m => Except -> ActionT Except m ()
+handleEx :: MonadIO m => Except -> ActionT Except m ()
 handleEx Forbidden = do
     status status403
     html "<h1>Forbidden!!!</h1>"
@@ -62,5 +63,6 @@ handleEx (NotFound i) = do
     status status404
     json (fourOfour i)
 handleEx (StringEx s) = do
+    liftIO $ warningM "NK-Rest: " $ show s
     status status404
     json pageNotFound
