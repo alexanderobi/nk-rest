@@ -23,11 +23,12 @@ toJsonUtil s = do
     Error e -> error $ "NK.Util.JsonUtil: Could not parse into JSON: " ++ e ++ "\nSqlValue: " ++ show s
     Success x -> return x
 
-toJsonUtil' :: FromJSON a => Maybe(Map.Map String SqlValue) -> IO a
-toJsonUtil' (Just a) = case fromJSON . toJSON $ a of
-  Error e -> error $ "NK.Util.JsonUtil: Could not parse into JSON: " ++ e ++ "\nSqlValue: " ++ show a
-  Success x -> return x
-toJsonUtil' _ = ioError nothingError
+toJsonUtil' :: FromJSON a => Maybe(Map.Map String SqlValue) -> Maybe a
+toJsonUtil' a = do
+  result <- fmap (fromJSON . toJSON) a
+  case result of
+    Error e -> error $ "NK.Util.JsonUtil: Could not parse into JSON: " ++ e ++ "\nSqlValue: " ++ show a
+    Success x -> return x
 
 instance ToJSON SqlValue where
     toJSON (SqlByteString x) = String . T.decodeUtf8 $ x

@@ -6,35 +6,37 @@ module NK.Controllers.User (
   , postUserRoute
 ) where
 
+import           Control.Monad.IO.Class
 import           Control.Monad.Trans.Reader
 import           NK.DBConnection            (getConnection)
 import           NK.Model.User              (createUser, getUserById, getUsers)
-import           Web.Scotty                 (ActionM, ScottyM, get, json,
-                                             jsonData, liftAndCatchIO, param,
-                                             post)
+import           NK.Controllers.Response    (Except(..))
+import           Web.Scotty.Trans           (ScottyT, ActionT, get, json, jsonData, param, post, liftAndCatchIO, raise)
 
-getUserByIdAction :: ActionM ()
+getUserByIdAction :: MonadIO m => ActionT Except m ()
 getUserByIdAction = do
   idx <- param "id"
-  result <- liftAndCatchIO (getConnection >>= runReaderT (getUserById idx))
-  json result
+  result <- liftAndCatchIO $ getConnection >>= runReaderT (getUserById idx)
+  case result of
+    Just res -> json res
+    Nothing -> raise (NotFound 832)
 
-getUsersAction :: ActionM ()
+getUsersAction :: MonadIO m => ActionT Except m ()
 getUsersAction = do
-  result <- liftAndCatchIO (getConnection >>= runReaderT getUsers)
+  result <- liftAndCatchIO $ getConnection >>= runReaderT getUsers
   json result
 
-postUserAction :: ActionM ()
+postUserAction :: MonadIO m => ActionT Except m ()
 postUserAction = do
   user <- jsonData
-  result <- liftAndCatchIO (getConnection >>= runReaderT (createUser user))
+  result <- liftAndCatchIO $ getConnection >>= runReaderT (createUser user)
   json result
 
-getUserByIdRoute :: ScottyM ()
-getUserByIdRoute = get "/users/:id" getUserByIdAction
+getUserByIdRoute :: MonadIO m => ScottyT Except m ()
+getUserByIdRoute = get "/users/:id/" getUserByIdAction
 
-getUsersRoute :: ScottyM ()
-getUsersRoute = get "/users" getUsersAction
+getUsersRoute :: MonadIO m => ScottyT Except m ()
+getUsersRoute = get "/users/" getUsersAction
 
-postUserRoute :: ScottyM ()
-postUserRoute = post "/users" postUserAction
+postUserRoute :: MonadIO m => ScottyT Except m ()
+postUserRoute = post "/users/" postUserAction
