@@ -20,6 +20,7 @@ library
                      , NK.Model.User
                      , NK.Controllers.User
                      , NK.Util.JsonUtil
+                     , NK.Controllers.Response
   build-depends:       base >= 4.7 && < 5
                      , scotty
                      , wai-extra
@@ -30,6 +31,7 @@ library
                      , convertible
                      , containers
                      , transformers
+                     , http-types
   default-language:    Haskell2010
 
 executable nk-rest-exe
