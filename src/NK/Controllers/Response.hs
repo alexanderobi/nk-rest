@@ -12,6 +12,7 @@ import           Network.HTTP.Types
 import           Data.Aeson                 (ToJSON, FromJSON, toEncoding, genericToEncoding, defaultOptions)
 import           GHC.Generics
 import           System.Log.Logger
+import           NK.Util.Logger (appLogger, appLoggerName)
 
 data Except = Forbidden | NotFound Int | StringEx String deriving (Show, Eq)
 
@@ -63,6 +64,7 @@ handleEx (NotFound i) = do
     status status404
     json (fourOfour i)
 handleEx (StringEx s) = do
-    liftIO $ warningM "NK-Rest: " $ show s
+    liftIO appLogger
+    liftIO $ warningM appLoggerName $ show s
     status status404
     json pageNotFound
