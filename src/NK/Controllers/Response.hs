@@ -65,6 +65,6 @@ handleEx (NotFound i) = do
     json (fourOfour i)
 handleEx (StringEx s) = do
     liftIO appLogger
-    liftIO $ warningM appLoggerName $ show s
+    liftIO $ errorM appLoggerName $ show s
     status status404
     json pageNotFound
