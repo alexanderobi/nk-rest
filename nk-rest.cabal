@@ -34,6 +34,7 @@ library
                      , transformers
                      , http-types
                      , hslogger
+                     , wai-cors
   default-language:    Haskell2010
 
 executable nk-rest-exe
